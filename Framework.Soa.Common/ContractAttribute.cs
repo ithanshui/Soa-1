@@ -2,12 +2,12 @@
 
 namespace Framework.Soa.Common
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false)]
     public class ContractAttribute : Attribute
     {
-        public string ContractUrl { get; set; }
+        public string ContractUrl { get; private set; }
 
-        public string ContractDesc { get; set; }
+        public string ContractDesc { get; private set; }
 
         /// <summary>
         /// 

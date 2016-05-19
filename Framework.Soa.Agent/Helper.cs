@@ -1,7 +1,8 @@
 ﻿using System;
-using Framework.Soa.Common;
+using System.Diagnostics;
 using System.Collections.Concurrent;
 
+using Framework.Soa.Common;
 using Newtonsoft.Json;
 
 namespace Framework.Soa.Agent
@@ -12,19 +13,7 @@ namespace Framework.Soa.Agent
 
         private static ContractAttribute GetContractAttributeFromType(Type contractType)
         {
-            ContractAttribute contract = null;
-
-            object[] objects = contractType.GetCustomAttributes(true);
-
-            foreach (object @object in objects)
-            {
-                if (@object.GetType().Name == "ContractAttribute")
-                {
-                    contract = @object as ContractAttribute;
-
-                    break;
-                }
-            }
+            ContractAttribute contract = contractType.GetCustomAttributes(false)[0] as ContractAttribute;
 
             if (contract == null) { throw new ArgumentNullException("ContractAttribute"); }
 

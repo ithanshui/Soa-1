@@ -12,5 +12,28 @@ namespace Framework.Soa.Common
         public string MessageCode { get; set; }
 
         public TimeSpan ResponseTime { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messageText"></param>
+        /// <param name="messageCode"></param>
+        public MessageDTO(string messageText, string messageCode)
+        {
+            this.MessageText = messageText;
+            this.MessageCode = messageCode;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messageText"></param>
+        /// <param name="messageCode"></param>
+        /// <param name="responseTime"></param>
+        public MessageDTO(string messageText, string messageCode, TimeSpan responseTime)
+            : this(messageText, messageCode)
+        {
+            this.ResponseTime = responseTime;
+        }
     }
 }

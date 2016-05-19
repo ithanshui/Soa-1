@@ -122,18 +122,17 @@ namespace Framework.Soa.Agent
                         Task<string> strTask = responseTask.Result.Content.ReadAsStringAsync();
 
                         if (responseTask.Result.IsSuccessStatusCode)
-                        {
                             contract.Response = Helper.DeserializeObject<TResponse>(strTask.Result);
+                        else
+                        {
+                            contract.Response = (TResponse)Activator.CreateInstance(typeof(TResponse));
+                            contract.Response.Message = new MessageDTO("0", "");
                         }
                     }
                     catch (Exception ex)
                     {
                         contract.Response = (TResponse)Activator.CreateInstance(typeof(TResponse));
-                        contract.Response.Message = new MessageDTO()
-                        {
-                            MessageCode = "0",
-                            MessageText = ex.Message
-                        };
+                        contract.Response.Message = new MessageDTO("0", ex.Message);
                     }
                 }
             }
