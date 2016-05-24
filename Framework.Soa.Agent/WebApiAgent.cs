@@ -17,7 +17,7 @@ namespace Framework.Soa.Agent
         /// <summary>
         /// 
         /// </summary>
-        private string svcUrl;
+        private string serviceUrl;
 
         /// <summary>
         /// 
@@ -33,11 +33,11 @@ namespace Framework.Soa.Agent
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="svcUrl"></param>
+        /// <param name="serviceUrl"></param>
         /// <param name="httpMethod"></param>
-        public WebApiAgent(string svcUrl, string httpMethod = "POST")
+        public WebApiAgent(string serviceUrl, string httpMethod = "POST")
         {
-            this.svcUrl = svcUrl;
+            this.serviceUrl = serviceUrl;
             this.httpMethod = httpMethod;
         }
 
@@ -52,13 +52,13 @@ namespace Framework.Soa.Agent
             where TRequest : Request
             where TResponse : Response
         {
-            this.svcUrl = this.svcUrl.TrimEnd('/');
+            this.serviceUrl = this.serviceUrl.TrimEnd('/');
 
             ContractAttribute contractAttribute = Helper.GetContractAttribute(contract.GetType());
 
-            this.svcUrl += "/" + contractAttribute.ContractUrl.TrimStart('/');
+            this.serviceUrl += "/" + contractAttribute.ContractUrl.TrimStart('/');
 
-            return new Uri(svcUrl);
+            return new Uri(serviceUrl);
         }
 
         /// <summary>
@@ -140,6 +140,63 @@ namespace Framework.Soa.Agent
             sw.Stop();
 
             contract.Response.Message.ResponseTime = sw.Elapsed;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TRequest"></typeparam>
+        /// <typeparam name="TResponse"></typeparam>
+        /// <param name="serviceUrl"></param>
+        /// <param name="request"></param>
+        /// <param name="serviceToken"></param>
+        /// <returns></returns>
+        public TResponse Call<TRequest, TResponse>(string serviceUrl, TRequest request, string serviceToken)
+            where TRequest : Request
+            where TResponse : Response
+        {
+            Stopwatch sw = new Stopwatch();
+
+            sw.Start();
+
+            TResponse response = default(TResponse);
+
+            CustomMessageHandler handler = new CustomMessageHandler(serviceToken);
+
+            using (HttpClient client = new HttpClient(handler))
+            {
+                using (StringContent content = new StringContent(Helper.SerializeObject(request), Encoding.UTF8, mediaType))
+                {
+                    try
+                    {
+                        Task<HttpResponseMessage> responseTask = GetResponseAsync(new Uri(serviceUrl), content, client);
+
+                        Task<string> strTask = responseTask.Result.Content.ReadAsStringAsync();
+
+                        if (responseTask.Result.IsSuccessStatusCode)
+                        {
+                            response = Helper.DeserializeObject<TResponse>(strTask.Result);
+                            response.Message = new MessageDTO("1", "");
+                        }
+                        else
+                        {
+                            response = (TResponse)Activator.CreateInstance(typeof(TResponse));
+                            response.Message = new MessageDTO("0", "");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        response = (TResponse)Activator.CreateInstance(typeof(TResponse));
+                        response.Message = new MessageDTO("0", ex.Message);
+                    }
+                }
+            }
+
+            sw.Stop();
+
+            response.Message.ResponseTime = sw.Elapsed;
+
+            return response;
         }
     }
 }

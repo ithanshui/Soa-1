@@ -6,5 +6,10 @@
     public class Response : IResponse
     {
         public MessageDTO Message { get; set; }
+
+        public Response()
+        {
+            this.Message = new MessageDTO();
+        }
     }
 }

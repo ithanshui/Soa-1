@@ -13,6 +13,10 @@ namespace Framework.Soa.Common
 
         public TimeSpan ResponseTime { get; set; }
 
+        public MessageDTO()
+        {
+        }
+
         /// <summary>
         /// 
         /// </summary>
